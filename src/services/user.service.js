@@ -6,7 +6,7 @@ const INTERNAL_ERROR = formatServiceReturn(500, 'Internal server error');
 
 const getAll = async () => {
   try {
-    const users = await User.findAll();
+    const users = await User.findAll({ attributes: { exclude: ['password'] } });
     return formatServiceReturn(200, users);
   } catch (error) {
     return INTERNAL_ERROR;
