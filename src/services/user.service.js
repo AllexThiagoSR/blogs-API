@@ -1,6 +1,6 @@
 const { User } = require('../models');
 const formatServiceReturn = require('../utils/formatServiceReturn');
-const { createToken } = require('../utils/createToken');
+const { createToken } = require('../utils/tokenUtils');
 
 const INTERNAL_ERROR = formatServiceReturn(500, 'Internal server error');
 
