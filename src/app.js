@@ -1,6 +1,7 @@
 const express = require('express');
 const { userRouter } = require('./routes');
 const { userController } = require('./controller');
+const validateLogin = require('./middlewares/validateLogin');
 
 const app = express();
 
@@ -12,6 +13,6 @@ app.use(express.json());
 
 app.use('/users', userRouter);
 
-app.post('/login', userController.login);
+app.post('/login', validateLogin, userController.login);
 
 module.exports = app;
