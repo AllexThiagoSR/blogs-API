@@ -31,8 +31,13 @@ const create = async ({ email, password, displayName, image }) => {
   try {
     const user = await User.create({ email, password, displayName, image });
     const token = createToken(user);
+    console.log(token);
     return formatServiceReturn(201, { token });
   } catch (error) {
+    console.log(error.original.code);
+    if (error.original.code === 'ER_DUP_ENTRY') {
+      return formatServiceReturn(409, 'User already registered');
+    }
     return INTERNAL_ERROR;
   }
 };
