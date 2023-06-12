@@ -14,6 +14,7 @@ module.exports = {
         displayName: {
           field: 'display_name',
           type: Sequelize.STRING,
+          unique: true,
           allowNull: false,
         },
         email: {
