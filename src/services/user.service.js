@@ -4,6 +4,15 @@ const { createToken } = require('../utils/tokenUtils');
 
 const INTERNAL_ERROR = formatServiceReturn(500, 'Internal server error');
 
+const getAll = async () => {
+  try {
+    const users = await User.findAll();
+    return formatServiceReturn(200, users);
+  } catch (error) {
+    return INTERNAL_ERROR;
+  }
+};
+
 const getById = async (id) => {
   try {
     const user = await User.findByPk(id);
@@ -42,4 +51,4 @@ const create = async ({ email, password, displayName, image }) => {
   }
 };
 
-module.exports = { login, getById, create };
+module.exports = { login, getById, create, getAll };
