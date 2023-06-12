@@ -11,7 +11,7 @@ app.get('/', (_request, response) => {
 
 app.use(express.json());
 
-app.use('/users', userRouter);
+app.use('/user', userRouter);
 
 app.post('/login', validateLogin, userController.login);
 

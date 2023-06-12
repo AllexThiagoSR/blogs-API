@@ -1,9 +1,8 @@
-const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 const formatServiceReturn = require('../utils/formatServiceReturn');
+const { createToken } = require('../utils/createToken');
 
 const INTERNAL_ERROR = formatServiceReturn(500, 'Internal server error');
-const { JWT_SECRET } = process.env;
 
 const getById = async (id) => {
   try {
@@ -16,21 +15,26 @@ const getById = async (id) => {
 };
 
 const login = async (email, password) => {
-  const jwtConfig = { expiresIn: '2d', algorithm: 'HS256' };
   try {
     const user = await User.findOne({ where: { email } });
     if (!user || user.password !== password) {
       return formatServiceReturn(400, 'Invalid fields');
     }
-    const token = jwt.sign(
-      { user: { id: user.id, username: user.displayName } },
-      JWT_SECRET,
-      jwtConfig,
-    );
+    const token = createToken({ id: user.id, username: user.displayName });
     return formatServiceReturn(200, { token });
   } catch (error) {
     return INTERNAL_ERROR;
   }
 };
 
-module.exports = { login, getById };
+const create = async ({ email, password, displayName, image }) => {
+  try {
+    const user = await User.create({ email, password, displayName, image });
+    const token = createToken(user);
+    return formatServiceReturn(201, { token });
+  } catch (error) {
+    return INTERNAL_ERROR;
+  }
+};
+
+module.exports = { login, getById, create };
