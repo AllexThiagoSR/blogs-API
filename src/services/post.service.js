@@ -81,4 +81,34 @@ const getAll = async () => {
   }
 };
 
-module.exports = { create, getById, getAll };
+const userIsAuthorized = (userId, post) => Number(userId) === post.userId;
+
+const updatePost = async (postId, { title, content }) => BlogPost.update(
+  { title, content },
+  {
+    where: { id: postId },
+    include: [
+      {
+        model: User,
+        as: 'user',
+        attributes: { exclude: ['password'] },
+      },
+      {
+        model: Category,
+        as: 'categories',
+        through: { model: PostCategory, attributes: [] },
+      },
+    ],
+  },
+);
+
+const update = async (postId, userId, fields) => {
+  const post = await BlogPost.findByPk(postId);
+  if (!post) return formatServiceReturn(404, 'Post does not exist');
+  if (!userIsAuthorized(userId, post)) return formatServiceReturn(401, 'Unauthorized user');
+  await BlogPost.update(fields, { where: { userId } });
+  const updatedPost = await updatePost(postId, fields);
+  return formatServiceReturn(200, updatedPost);
+};
+
+module.exports = { create, getById, getAll, update };
