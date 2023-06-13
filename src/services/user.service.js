@@ -15,8 +15,8 @@ const getAll = async () => {
 
 const getById = async (id) => {
   try {
-    const user = await User.findByPk(id);
-    if (!user) return formatServiceReturn(404, 'User not found');
+    const user = await User.findByPk(id, { attributes: { exclude: ['password'] } });
+    if (!user) return formatServiceReturn(404, 'User does not exist');
     return formatServiceReturn(200, user);
   } catch (error) {
     return INTERNAL_ERROR;
