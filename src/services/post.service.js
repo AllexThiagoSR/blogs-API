@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 const config = require('../config/config');
-const { Category, BlogPost, PostCategory } = require('../models');
+const { Category, BlogPost, PostCategory, User } = require('../models');
 const formatServiceReturn = require('../utils/formatServiceReturn');
 
 const env = process.env.NODE_ENV || 'development';
@@ -31,9 +31,35 @@ const create = async (userId, postInfos) => {
     );
     return result;
   } catch (error) {
-    console.log(error);
-    return formatServiceReturn(500, 'Internal sever error');
+    return formatServiceReturn(500, 'Internal server error');
   }
 };
 
-module.exports = { create };
+const getPost = async (id) => BlogPost.findByPk(id, {
+  include: [
+    { 
+      model: User,
+      as: 'user',
+      attributes: { exclude: ['password'] },
+    },
+    {
+      model: Category,
+      as: 'categories',
+      through: { model: PostCategory, attributes: [] },
+    },
+  ],
+
+});
+
+const getById = async (id) => {
+  try {
+    const post = await getPost(id);
+    if (!post) return formatServiceReturn(404, 'Post does not exist');
+    return formatServiceReturn(200, post);
+  } catch (error) {
+    console.log(error);
+    return formatServiceReturn(500, 'Internal server error');
+  }
+};
+
+module.exports = { create, getById };

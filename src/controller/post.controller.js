@@ -6,4 +6,10 @@ const create = async (req, res) => {
   return res.status(status).json(data);
 };
 
-module.exports = { create };
+const getById = async (req, res) => {
+  const { id } = req.params;
+  const { status, data } = await postService.getById(id);
+  return res.status(status).json(data);
+};
+
+module.exports = { create, getById };
