@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       timestamps: false,
-      uderscored: true,
+      underscored: true,
       tableName: 'blog_posts'
     }
   );
