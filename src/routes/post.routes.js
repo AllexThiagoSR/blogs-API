@@ -1,7 +1,6 @@
 const { Router } = require('express');
-const validateToken = require('../middlewares/validateToken');
 const { postController } = require('../controller');
-const validatePost = require('../middlewares/validatePost');
+const { validateToken, validatePost, validateUpdatePost } = require('../middlewares');
 
 const router = Router();
 
@@ -11,6 +10,6 @@ router.get('/', validateToken, postController.getAll);
 
 router.get('/:id', validateToken, postController.getById);
 
-router.put('/:id', validateToken, postController.update);
+router.put('/:id', validateToken, validateUpdatePost, postController.update);
 
 module.exports = router;
