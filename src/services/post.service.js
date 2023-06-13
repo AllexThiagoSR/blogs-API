@@ -57,9 +57,28 @@ const getById = async (id) => {
     if (!post) return formatServiceReturn(404, 'Post does not exist');
     return formatServiceReturn(200, post);
   } catch (error) {
-    console.log(error);
     return formatServiceReturn(500, 'Internal server error');
   }
 };
 
-module.exports = { create, getById };
+const getAll = async () => {
+  try {
+    const posts = await BlogPost.findAll({ include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: { exclude: ['password'] },
+        },
+        {
+          model: Category,
+          as: 'categories',
+          through: { model: PostCategory, attributes: [] },
+        },
+      ] });
+    return formatServiceReturn(200, posts);
+  } catch (error) {
+    return formatServiceReturn(500, 'Internal server error');
+  }
+};
+
+module.exports = { create, getById, getAll };
