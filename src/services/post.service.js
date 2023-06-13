@@ -10,14 +10,17 @@ const sequelize = new Sequelize(config[env]);
 const create = async (userId, { title, content, categoryIds }) => {
   const result = await sequelize.transaction(async (transaction) => {
     const post = await BlogPost.create({ title, userId, content }, { transaction });
-    const postCategories = categoryIds.map((id) => {
-      const category = Category.findByPk(id);
+
+    const postCategories = await Promise.all(categoryIds.map(async (id) => {
+      const category = await Category.findByPk(id);
       if (!category) return undefined;
       return { postId: post.id, categoryId: category.id };
-    });
+    }));
+
     if (postCategories.includes(undefined)) { 
       return formatServiceReturn(400, 'one or more "categoryIds" not found');
     }
+    
     await PostCategory.bulkCreate(postCategories, { transaction });
     return formatServiceReturn(201, post);
   });
