@@ -85,30 +85,20 @@ const userIsAuthorized = (userId, post) => Number(userId) === post.userId;
 
 const updatePost = async (postId, { title, content }) => BlogPost.update(
   { title, content },
-  {
-    where: { id: postId },
-    include: [
-      {
-        model: User,
-        as: 'user',
-        attributes: { exclude: ['password'] },
-      },
-      {
-        model: Category,
-        as: 'categories',
-        through: { model: PostCategory, attributes: [] },
-      },
-    ],
-  },
+  { where: { id: postId } },
 );
 
 const update = async (postId, userId, fields) => {
-  const post = await BlogPost.findByPk(postId);
-  if (!post) return formatServiceReturn(404, 'Post does not exist');
-  if (!userIsAuthorized(userId, post)) return formatServiceReturn(401, 'Unauthorized user');
-  await BlogPost.update(fields, { where: { userId } });
-  const updatedPost = await updatePost(postId, fields);
-  return formatServiceReturn(200, updatedPost);
+  try {
+    const post = await BlogPost.findByPk(postId);
+    if (!post) return formatServiceReturn(404, 'Post does not exist');
+    if (!userIsAuthorized(userId, post)) return formatServiceReturn(401, 'Unauthorized user');
+    await updatePost(postId, fields);
+    const updatedPost = await getPost(postId);
+    return formatServiceReturn(200, updatedPost);
+  } catch (error) {
+    return formatServiceReturn(500, 'Internal server error');
+  }
 };
 
 module.exports = { create, getById, getAll, update };
