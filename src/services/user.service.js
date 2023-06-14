@@ -43,7 +43,6 @@ const create = async ({ email, password, displayName, image }) => {
     console.log(token);
     return formatServiceReturn(201, { token });
   } catch (error) {
-    console.log(error.original.code);
     if (error.original.code === 'ER_DUP_ENTRY') {
       return formatServiceReturn(409, 'User already registered');
     }
@@ -51,4 +50,13 @@ const create = async ({ email, password, displayName, image }) => {
   }
 };
 
-module.exports = { login, getById, create, getAll };
+const destroy = async (id) => {
+  try {
+    await User.destroy({ where: { id } });
+    return formatServiceReturn(204);
+  } catch (error) {
+    return INTERNAL_ERROR;
+  }
+};
+
+module.exports = { login, destroy, getById, create, getAll };

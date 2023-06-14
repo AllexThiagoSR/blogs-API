@@ -22,4 +22,10 @@ const getById = async (req, res) => {
   return res.status(status).json(data);
 };
 
-module.exports = { login, create, getAll, getById };
+const destroy = async (req, res) => {
+  const { id } = req.user;
+  const { status, data } = await userService.destroy(id);
+  return res.status(status).json(data);
+};
+
+module.exports = { login, create, getAll, getById, destroy };
