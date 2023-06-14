@@ -10,7 +10,7 @@ module.exports = {
           primaryKey: true,
           allowNull: false,
           field: 'post_id',
-          referenses: {
+          references: {
             model: 'blog_posts',
             key: 'id',
           },

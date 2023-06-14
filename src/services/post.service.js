@@ -111,6 +111,7 @@ const deletePost = async (id, userId) => {
     await BlogPost.destroy({ where: { id } });
     return formatServiceReturn(204);
   } catch (error) {
+    console.log(error);
     return INTERNAL_ERROR;
   }
 };
