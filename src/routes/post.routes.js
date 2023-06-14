@@ -8,6 +8,8 @@ router.post('/', validateToken, validatePost, postController.create);
 
 router.get('/', validateToken, postController.getAll);
 
+router.get('/search', validateToken, postController.search);
+
 router.get('/:id', validateToken, postController.getById);
 
 router.put('/:id', validateToken, validateUpdatePost, postController.update);

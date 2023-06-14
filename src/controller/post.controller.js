@@ -17,6 +17,11 @@ const getAll = async (_req, res) => {
   return res.status(status).json(data);
 };
 
+const search = async (req, res) => {
+  const { status, data } = await postService.getAll(req.query.q);
+  return res.status(status).json(data);
+};
+
 const update = async (req, res) => {
   const postId = req.params.id;
   const userId = req.user.id;
@@ -31,4 +36,4 @@ const destroy = async (req, res) => {
   return res.status(status).json(data);
 };
 
-module.exports = { create, getById, destroy, getAll, update };
+module.exports = { create, getById, destroy, getAll, update, search };

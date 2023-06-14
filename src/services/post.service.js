@@ -37,7 +37,7 @@ const create = async (userId, postInfos) => {
   }
 };
 
-const getPost = async (id) => BlogPost.findByPk(id, {
+const getPostById = async (id) => BlogPost.findByPk(id, {
   include: [
     { 
       model: User,
@@ -55,7 +55,7 @@ const getPost = async (id) => BlogPost.findByPk(id, {
 
 const getById = async (id) => {
   try {
-    const post = await getPost(id);
+    const post = await getPostById(id);
     if (!post) return formatServiceReturn(404, 'Post does not exist');
     return formatServiceReturn(200, post);
   } catch (error) {
@@ -63,20 +63,24 @@ const getById = async (id) => {
   }
 };
 
-const getAll = async () => {
+const getPosts = async (q = '') => BlogPost.findAll(
+  {
+    where: {
+      [Op.or]: [
+        { title: { [Op.substring]: q } },
+        { content: { [Op.substring]: q } },
+      ],
+    },
+    include: [
+      { model: User, as: 'user', attributes: { exclude: ['password'] } },
+      { model: Category, as: 'categories', through: { model: PostCategory, attributes: [] } },
+    ],
+  },
+);
+
+const getAll = async (q) => {
   try {
-    const posts = await BlogPost.findAll({ include: [
-        {
-          model: User,
-          as: 'user',
-          attributes: { exclude: ['password'] },
-        },
-        {
-          model: Category,
-          as: 'categories',
-          through: { model: PostCategory, attributes: [] },
-        },
-      ] });
+    const posts = await getPosts(q);
     return formatServiceReturn(200, posts);
   } catch (error) {
     return INTERNAL_ERROR;
@@ -96,7 +100,7 @@ const update = async (postId, userId, fields) => {
     if (!post) return formatServiceReturn(404, 'Post does not exist');
     if (!userIsAuthorized(userId, post)) return formatServiceReturn(401, 'Unauthorized user');
     await updatePost(postId, fields);
-    const updatedPost = await getPost(postId);
+    const updatedPost = await getPostById(postId);
     return formatServiceReturn(200, updatedPost);
   } catch (error) {
     return INTERNAL_ERROR;
@@ -105,7 +109,7 @@ const update = async (postId, userId, fields) => {
 
 const deletePost = async (id, userId) => {
   try {
-    const post = await getPost(id);
+    const post = await getPostById(id);
     if (!post) return formatServiceReturn(404, 'Post does not exist');
     if (!userIsAuthorized(userId, post)) return formatServiceReturn(401, 'Unauthorized user');
     await BlogPost.destroy({ where: { id } });
