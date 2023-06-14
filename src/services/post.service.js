@@ -9,6 +9,8 @@ const sequelize = new Sequelize(config[env]);
 
 const { Op } = Sequelize;
 
+const INTERNAL_ERROR = formatServiceReturn(500, 'Internal server error');
+
 const createPostCategories = async (categoryIds, postId) => {
   const categories = await Category.findAll({ where: { id: { [Op.in]: categoryIds } } });
   return categories.map(({ id }) => ({ postId, categoryId: id }));
@@ -31,7 +33,7 @@ const create = async (userId, postInfos) => {
     );
     return result;
   } catch (error) {
-    return formatServiceReturn(500, 'Internal server error');
+    return INTERNAL_ERROR;
   }
 };
 
@@ -57,7 +59,7 @@ const getById = async (id) => {
     if (!post) return formatServiceReturn(404, 'Post does not exist');
     return formatServiceReturn(200, post);
   } catch (error) {
-    return formatServiceReturn(500, 'Internal server error');
+    return INTERNAL_ERROR;
   }
 };
 
@@ -77,15 +79,15 @@ const getAll = async () => {
       ] });
     return formatServiceReturn(200, posts);
   } catch (error) {
-    return formatServiceReturn(500, 'Internal server error');
+    return INTERNAL_ERROR;
   }
 };
 
 const userIsAuthorized = (userId, post) => Number(userId) === post.userId;
 
-const updatePost = async (postId, { title, content }) => BlogPost.update(
+const updatePost = async (id, { title, content }) => BlogPost.update(
   { title, content },
-  { where: { id: postId } },
+  { where: { id } },
 );
 
 const update = async (postId, userId, fields) => {
@@ -97,8 +99,20 @@ const update = async (postId, userId, fields) => {
     const updatedPost = await getPost(postId);
     return formatServiceReturn(200, updatedPost);
   } catch (error) {
-    return formatServiceReturn(500, 'Internal server error');
+    return INTERNAL_ERROR;
   }
 };
 
-module.exports = { create, getById, getAll, update };
+const deletePost = async (id, userId) => {
+  try {
+    const post = await getPost(id);
+    if (!post) return formatServiceReturn(404, 'Post does not exist');
+    if (!userIsAuthorized(userId, post)) return formatServiceReturn(401, 'Unauthorized user');
+    await BlogPost.destroy({ where: { id } });
+    return formatServiceReturn(204);
+  } catch (error) {
+    return INTERNAL_ERROR;
+  }
+};
+
+module.exports = { create, getById, getAll, update, deletePost };
